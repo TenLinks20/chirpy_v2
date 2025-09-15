@@ -15,6 +15,7 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries *database.Queries
+	platform string
 }
 
 func main() {
@@ -22,6 +23,11 @@ func main() {
 	const port = "8080"
 
 	godotenv.Load()
+
+	platform := os.Getenv("PLATFORM")
+	if platform == "" {
+		log.Fatal("platform must be set")
+	}
 
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
@@ -43,16 +49,23 @@ func main() {
 	apiCfg := &apiConfig{
 		fileserverHits: atomic.Int32{},
 		dbQueries: dbQueries,
+		platform: platform,
 	}
 
+	// static files
 	fileHandler := http.FileServer(http.Dir(filepathRoot))
 	mux.Handle("/app/", http.StripPrefix("/app", apiCfg.middlewareMetricsInc(fileHandler)))
 
+	// admin handlers
 	mux.Handle("GET /api/healthz", http.StripPrefix("/api", http.HandlerFunc(handlerReadiness)))
-	mux.Handle("POST /api/validate_chirp", http.StripPrefix("/api", http.HandlerFunc(handlerValidateChirps)))
 	mux.Handle("GET /admin/metrics", http.StripPrefix("/admin", http.HandlerFunc(apiCfg.handlerMetrics)))
 	mux.Handle("POST /admin/reset", http.StripPrefix("/admin", http.HandlerFunc(apiCfg.handlerReset)))
 
+	// chirp handlers
+	mux.Handle("POST /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewChirp)))
+
+	// user handlers
+	mux.Handle("POST /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewUser)))
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(srv.ListenAndServe())

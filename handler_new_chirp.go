@@ -5,16 +5,27 @@ import (
 	"net/http"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/google/uuid"
+	"github.com/TenLinks20/chirpy_v2/internal/database"
+
 )
 
-func handlerValidateChirps(w http.ResponseWriter, r *http.Request)  {
+func (cfg *apiConfig) handlerNewChirp(w http.ResponseWriter, r *http.Request)  {
 	type parameters struct {
 		Body string `json:"body"`
+		UserID string `json:"user_id"`
 	}
 
 	var params parameters
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondWithErr(w, 400, "invalid input")
+		return
+	}
+
+	userID, err := uuid.Parse(params.UserID)
+	if err != nil {
+		respondWithErr(w, 400, "invalid user")
 		return
 	}
 
@@ -40,6 +51,17 @@ func handlerValidateChirps(w http.ResponseWriter, r *http.Request)  {
 	}
 	cleanedBody := strings.Join(words, " ")
 
-	respBody := &struct {CleanedBody string `json:"cleaned_body"`}{CleanedBody: cleanedBody,}
-	respondWithJSON(w, 200, respBody)
+	dbParams := database.CreateChirpParams{
+		Body: cleanedBody,
+		UserID: userID,
+	}
+
+	dbChirp, err := cfg.dbQueries.CreateChirp(r.Context(), dbParams)
+	if err != nil {
+		respondWithErr(w, 500, "unable to create chirp")
+		return
+	}
+	chirp := dbToAPIChirp(&dbChirp)
+
+	respondWithJSON(w, 201, &chirp)
 }
