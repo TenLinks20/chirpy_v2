@@ -58,6 +58,7 @@ func main() {
 
 	// admin handlers
 	mux.Handle("GET /api/healthz", http.StripPrefix("/api", http.HandlerFunc(handlerReadiness)))
+	mux.Handle("POST /api/login", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerLogin)))
 	mux.Handle("GET /admin/metrics", http.StripPrefix("/admin", http.HandlerFunc(apiCfg.handlerMetrics)))
 	mux.Handle("POST /admin/reset", http.StripPrefix("/admin", http.HandlerFunc(apiCfg.handlerReset)))
 
