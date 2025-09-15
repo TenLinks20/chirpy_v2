@@ -62,7 +62,9 @@ func main() {
 	mux.Handle("POST /admin/reset", http.StripPrefix("/admin", http.HandlerFunc(apiCfg.handlerReset)))
 
 	// chirp handlers
-	mux.Handle("POST /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewChirp)))
+	mux.Handle("POST /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewChirp))) 
+	mux.Handle("GET /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerGetAllChirps)))
+	mux.Handle("GET /api/chirps/{chirpID}", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerGetChirp)))
 
 	// user handlers
 	mux.Handle("POST /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewUser)))
