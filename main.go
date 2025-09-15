@@ -16,6 +16,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries *database.Queries
 	platform string
+	secret string
 }
 
 func main() {
@@ -23,6 +24,11 @@ func main() {
 	const port = "8080"
 
 	godotenv.Load()
+
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		log.Fatal("secret must be set")
+	}
 
 	platform := os.Getenv("PLATFORM")
 	if platform == "" {
@@ -50,6 +56,7 @@ func main() {
 		fileserverHits: atomic.Int32{},
 		dbQueries: dbQueries,
 		platform: platform,
+		secret: secret,
 	}
 
 	// static files

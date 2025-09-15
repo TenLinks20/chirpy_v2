@@ -6,26 +6,31 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/google/uuid"
+	"github.com/TenLinks20/chirpy_v2/internal/auth"
 	"github.com/TenLinks20/chirpy_v2/internal/database"
-
 )
 
 func (cfg *apiConfig) handlerNewChirp(w http.ResponseWriter, r *http.Request)  {
+
+	authValue, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithErr(w, 401, "no auth token")
+		return
+	}
+
+	userID, err := auth.ValidateJWT(authValue, cfg.secret)
+	if err != nil {
+		respondWithErr(w, 401, "no access permitted")
+		return
+	}
+
 	type parameters struct {
 		Body string `json:"body"`
-		UserID string `json:"user_id"`
 	}
 
 	var params parameters
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondWithErr(w, 400, "invalid input")
-		return
-	}
-
-	userID, err := uuid.Parse(params.UserID)
-	if err != nil {
-		respondWithErr(w, 400, "invalid user")
 		return
 	}
 
