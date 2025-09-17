@@ -75,9 +75,11 @@ func main() {
 	mux.Handle("POST /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewChirp))) 
 	mux.Handle("GET /api/chirps", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerGetAllChirps)))
 	mux.Handle("GET /api/chirps/{chirpID}", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerGetChirp)))
+	mux.Handle("DELETE /api/chirps/{chirpID}", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerDeleteChirp)))
 
 	// user handlers
 	mux.Handle("POST /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewUser)))
+	mux.Handle("PUT /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerUpdateUser)))
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(srv.ListenAndServe())
