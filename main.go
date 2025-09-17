@@ -25,6 +25,11 @@ func main() {
 
 	godotenv.Load()
 
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatal("polka key must be set")
+	}
+
 	secret := os.Getenv("SECRET")
 	if secret == "" {
 		log.Fatal("secret must be set")
@@ -80,6 +85,9 @@ func main() {
 	// user handlers
 	mux.Handle("POST /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerNewUser)))
 	mux.Handle("PUT /api/users", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerUpdateUser)))
+
+	// webhooks
+	mux.Handle("POST /api/polka/webhooks", http.StripPrefix("/api", http.HandlerFunc(apiCfg.handlerUpgradeUser)))
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(srv.ListenAndServe())
