@@ -17,6 +17,7 @@ type apiConfig struct {
 	dbQueries *database.Queries
 	platform string
 	secret string
+	polkaKey string
 }
 
 func main() {
@@ -62,6 +63,7 @@ func main() {
 		dbQueries: dbQueries,
 		platform: platform,
 		secret: secret,
+		polkaKey: polkaKey,
 	}
 
 	// static files

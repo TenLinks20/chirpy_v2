@@ -4,10 +4,21 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/TenLinks20/chirpy_v2/internal/auth"
 	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) handlerUpgradeUser(w http.ResponseWriter, r *http.Request)  {
+	key, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithErr(w, 401, "no key given")
+		return
+	}
+	
+	if key != cfg.polkaKey {
+		respondWithErr(w, 401, "incorrect key given")
+		return
+	}
 	
 	type polkaParams struct {
 		Event string `json:"event"`
